@@ -1,12 +1,25 @@
 # Image Resizer
 
-A 1-click Pinokio launcher for [Image Resizer](https://github.com/Arnold2006/Image_Resizer) — a Python desktop GUI application that batch-resizes images to a target size on the longest side while preserving aspect ratio.
+A 1-click Pinokio launcher for [Image Resizer](https://github.com/Arnold2006/Image_Resizer) — a modern dark-themed Python desktop application for batch resizing images while preserving aspect ratio.
 
 ## What the App Does
 
-Image Resizer lets you select multiple images at once and resize them all to a chosen width/height (512, 768, or 1024 pixels on the longest side). It uses Lanczos resampling for high quality output and saves results to a folder of your choice without modifying the originals.
+Image Resizer lets you select multiple images (by browsing or drag & drop) and resize them all to a chosen size on the longest side — 512, 768, or 1024 pixels. Output is automatically saved into a `Resized_<size>` folder created next to your source images. The originals are never modified.
+
+After each batch completes the app resets, so you can immediately resize the same images again at a different size without re-selecting anything.
 
 **Supported formats:** JPG, JPEG, PNG, BMP, GIF, TIFF, WebP
+
+## Features
+
+- 🌑 **Modern dark UI** built with CustomTkinter
+- 🖼 **Image previews** — selected files appear as thumbnail cards in a scrollable grid
+- ⬆ **Drag & drop** — drop images straight onto the window (powered by tkinterdnd2)
+- 🗂 **Auto output folder** — `Resized_<size>` is created next to your source files automatically
+- 🔁 **Re-run ready** — after resizing, the app resets so you can pick a new size and go again
+- 📊 **Live progress** — progress bar and counter update as each image is processed
+- ✕ **Per-image removal** — remove individual images from the queue before resizing
+- 🎨 **High quality** — Lanczos resampling, quality 95 output
 
 ## How to Use
 
@@ -16,18 +29,17 @@ Image Resizer lets you select multiple images at once and resize them all to a c
 3. Click **Install** — this clones the app and sets up the Python environment automatically.
 
 ### Running
-1. Click **Start** in the Pinokio sidebar. A desktop window will open.
-2. Select your target size (512, 768, or 1024 px) from the dropdown.
-3. Click **Select Images** and pick the files you want to resize.
-4. Choose an output folder.
-5. The app processes your images and shows a live status log with progress.
+1. Click **Start** in the Pinokio sidebar. The desktop app window will open.
+2. **Select images** — drag & drop files onto the drop zone, or click **Browse Files**.
+3. **Choose a target size** — 512, 768, or 1024 px — using the segmented button.
+4. Click **Resize Images**.
+5. A `Resized_<size>` folder is created next to your source images and files are saved there.
+6. Once done, the app resets — switch size and click **Resize Images** again if needed.
 
-### Output
-- Resized files are saved as `<original_name>_resized.<ext>` in the chosen folder.
-- Original files are never modified.
+### Output naming
+Resized files are saved as `<original_name>_resized.<ext>` inside the auto-created folder.
 
-### Example
-| Original | Target | Output |
+| Original | Target | Output dimensions |
 |---|---|---|
 | 1920 × 1080 | 1024 px | 1024 × 576 |
 | 800 × 1200 | 1024 px | 683 × 1024 |
@@ -37,17 +49,26 @@ Image Resizer lets you select multiple images at once and resize them all to a c
 
 | File | Purpose |
 |---|---|
-| `install.js` | Clones the app repo and installs Pillow into a venv |
+| `install.js` | Clones the app repo and installs dependencies into a venv |
 | `start.js` | Launches `app.py` inside the venv |
-| `update.js` | Pulls the latest changes for both launcher and app |
+| `update.js` | Pulls the latest changes for both the launcher and the app |
 | `reset.js` | Deletes the `app/` folder to restore a clean state |
 | `link.js` | Deduplicates library files to save disk space |
 | `pinokio.js` | Builds the dynamic Pinokio sidebar UI |
 | `pinokio.json` | App metadata (title, description, icon) |
 
+## Requirements
+
+- Python 3.7+
+- [Pillow](https://python-pillow.org/) — image processing
+- [CustomTkinter](https://github.com/TomSchimansky/CustomTkinter) — modern dark UI
+- [tkinterdnd2](https://github.com/pmgagne/tkinterdnd2) — drag & drop support
+
+All dependencies are installed automatically by the Pinokio launcher.
+
 ## API / Programmatic Access
 
-This app is a local desktop GUI (tkinter) and does not expose an HTTP server or API endpoints. To batch-resize images programmatically using the same logic, you can call the core resize function directly:
+This app is a local desktop GUI and does not expose an HTTP server. To use the same resize logic programmatically:
 
 ### Python
 
@@ -58,21 +79,19 @@ import os
 def resize_image(input_path, output_path, target_size=1024):
     img = Image.open(input_path)
     w, h = img.size
-    if w > h:
-        new_w, new_h = target_size, int(h * target_size / w)
-    else:
-        new_h, new_w = target_size, int(w * target_size / h)
-    img.resize((new_w, new_h), Image.Resampling.LANCZOS).save(output_path, quality=95, optimize=True)
+    scale = target_size / max(w, h)
+    nw, nh = int(w * scale), int(h * scale)
+    img.resize((nw, nh), Image.Resampling.LANCZOS).save(
+        output_path, quality=95, optimize=True)
 
-# Example
 resize_image("photo.jpg", "photo_resized.jpg", target_size=1024)
 ```
 
-### Command Line (using the same venv)
+### Command line (using the venv created by the launcher)
 
 ```bash
-# Activate the venv created by the installer (adjust path as needed)
-source app/env/bin/activate   # Linux / macOS
+# Activate the venv
+source app/env/bin/activate   # macOS / Linux
 app\env\Scripts\activate      # Windows
 
 python - <<'EOF'
@@ -80,14 +99,10 @@ from PIL import Image
 img = Image.open("input.jpg")
 w, h = img.size
 scale = 1024 / max(w, h)
-img.resize((int(w*scale), int(h*scale)), Image.Resampling.LANCZOS).save("output.jpg", quality=95)
+img.resize((int(w*scale), int(h*scale)), Image.Resampling.LANCZOS).save(
+    "output.jpg", quality=95)
 EOF
 ```
-
-## Requirements
-
-- Python 3.7+
-- [Pillow](https://python-pillow.org/) (installed automatically by the launcher)
 
 ## License
 
