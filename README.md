@@ -2,6 +2,8 @@
 
 A 1-click Pinokio launcher for [Image Resizer](https://github.com/Arnold2006/Image_Resizer) — a modern dark-themed Python desktop application for batch resizing images while preserving aspect ratio.
 
+![Image Resizer](Image_Resizer.png)
+
 ## What the App Does
 
 Image Resizer lets you select multiple images (by browsing or drag & drop) and resize them all to a chosen size on the longest side — 512, 768, or 1024 pixels. Output is automatically saved into a `Resized_<size>` folder created next to your source images. The originals are never modified.
