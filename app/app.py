@@ -371,18 +371,15 @@ class ImageResizerApp:
                 self._log(f"   ✗  {fname}  ERROR: {exc}")
 
             pct = i / total
-            self.root.after(0, self.progress.set, pct)
-            self.root.after(0, self.progress_label.configure,
-                            {"text": f"{i}/{total}"})
+            self.root.after(0, lambda p=pct: self.progress.set(p))
+            self.root.after(0, lambda i=i: self.progress_label.configure(text=f"{i}/{total}"))
 
         self._log(f"\n✅  Done — {success}/{total} resized successfully.")
-        self.root.after(0, self.resize_btn.configure,
-                        {"state": "normal", "text": "Resize Images"})
-        self.root.after(0, self.progress.set, 1.0)
-        self.root.after(0, self.progress_label.configure, {"text": ""})
-        self.root.after(1500, self.progress.set, 0)
-        self.root.after(1500, self.folder_label.configure,
-                        {"text": "Resized_<size>  next to source images"})
+        self.root.after(0, lambda: self.resize_btn.configure(state="normal", text="Resize Images"))
+        self.root.after(0, lambda: self.progress.set(1.0))
+        self.root.after(0, lambda: self.progress_label.configure(text=""))
+        self.root.after(1500, lambda: self.progress.set(0))
+        self.root.after(1500, lambda: self.folder_label.configure(text="Resized_<size>  next to source images"))
 
     def _log(self, msg: str):
         """Thread-safe log write."""
