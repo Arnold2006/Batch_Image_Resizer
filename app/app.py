@@ -14,17 +14,12 @@ from PIL import Image
 import customtkinter as ctk
 
 # ── Drag & drop ─────────────────────────────────────────────────────────────
-# tkinterdnd2 must be baked into the root window's class hierarchy — patching
-# it in afterwards does not work with CustomTkinter. We create a combined base.
+# CTk widgets work with any Tk root — we use TkinterDnD.Tk() directly so the
+# tkdnd extension is loaded correctly from the start. No combined class needed.
 try:
     from tkinterdnd2 import TkinterDnD, DND_FILES
-    class TkDnD(ctk.CTk, TkinterDnD.Tk):
-        """CustomTkinter window with native drag-and-drop support."""
-        def __init__(self):
-            super().__init__()
     DND_AVAILABLE = True
 except ImportError:
-    TkDnD = None
     DND_AVAILABLE = False
 
 # ── Theme ───────────────────────────────────────────────────────────────────
@@ -82,7 +77,13 @@ class ImageResizerApp:
 
     def __init__(self):
         # ── Root window ──────────────────────────────────────────────────
-        self.root = TkDnD() if DND_AVAILABLE else ctk.CTk()
+        # TkinterDnD.Tk() loads the tkdnd extension correctly from the start.
+        # CTk widgets work with any Tk root so no combined class is needed.
+        if DND_AVAILABLE:
+            self.root = TkinterDnD.Tk()
+            self.root.configure(bg="#1a1a2e")
+        else:
+            self.root = ctk.CTk()
 
         self.root.title("Image Resizer")
         self.root.geometry("860x700")
