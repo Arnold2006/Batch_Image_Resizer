@@ -92,7 +92,6 @@ class ImageResizerApp:
         self.file_paths: list[str] = []
         self.thumb_cards: dict[str, ThumbnailCard] = {}
         self.size_var    = ctk.StringVar(value="1024")
-        self.output_var  = ctk.StringVar(value="")
 
         self._build_ui()
 
@@ -197,19 +196,14 @@ class ImageResizerApp:
         # Spacer
         ctk.CTkFrame(row, fg_color="transparent", width=1).pack(side="left", expand=True)
 
-        # Output folder
+        # Auto output folder indicator
         ctk.CTkLabel(row, text="Output:",
                      font=ctk.CTkFont(size=13)).pack(side="left", padx=(0, 8))
         self.folder_label = ctk.CTkLabel(
-            row, textvariable=self.output_var,
+            row, text="Resized_<size>  next to source images",
             font=ctk.CTkFont(size=11), text_color="#8888cc",
-            wraplength=180, anchor="w")
-        self.folder_label.pack(side="left", padx=(0, 8))
-        ctk.CTkButton(
-            row, text="Choose…", command=self.choose_output,
-            fg_color="#7a3d00", hover_color="#a05200",
-            width=90, height=32, font=ctk.CTkFont(size=12)
-        ).pack(side="left", padx=(0, 16), pady=12)
+            wraplength=220, anchor="w")
+        self.folder_label.pack(side="left", padx=(0, 16), pady=12)
 
     def _build_action(self, parent):
         row = ctk.CTkFrame(parent, fg_color="transparent")
@@ -313,9 +307,19 @@ class ImageResizerApp:
         self._update_state()
 
     def choose_output(self):
-        folder = filedialog.askdirectory(title="Select output folder")
-        if folder:
-            self.output_var.set(folder)
+        pass  # no longer used — output folder is auto-computed
+
+    def start_resize(self):
+        if not self.file_paths:
+            self._append_log("⚠  No images selected.")
+            return
+        size     = int(self.size_var.get())
+        out_dir  = os.path.join(os.path.dirname(self.file_paths[0]), f"Resized_{size}")
+        os.makedirs(out_dir, exist_ok=True)
+        self.folder_label.configure(text=out_dir)
+        self.resize_btn.configure(state="disabled", text="Processing…")
+        self.progress.set(0)
+        threading.Thread(target=self._process, args=(out_dir,), daemon=True).start()
 
     def _update_state(self):
         """Toggle placeholder vs thumbnail grid depending on selection."""
@@ -335,25 +339,14 @@ class ImageResizerApp:
     # ─────────────────────────────────────────────────────────────────────
     # Resize logic (runs in background thread)
     # ─────────────────────────────────────────────────────────────────────
-    def start_resize(self):
-        if not self.file_paths:
-            self.log("⚠  No images selected.")
-            return
-        if not self.output_var.get():
-            self.log("⚠  Please choose an output folder first.")
-            return
-        self.resize_btn.configure(state="disabled", text="Processing…")
-        self.progress.set(0)
-        threading.Thread(target=self._process, daemon=True).start()
-
-    def _process(self):
+    def _process(self, out_dir: str):
         paths   = list(self.file_paths)
-        out_dir = self.output_var.get()
         size    = int(self.size_var.get())
         total   = len(paths)
         success = 0
 
         self._log(f"\n▶  Resizing {total} image(s)  →  {size}px longest side")
+
         self._log(f"   Output: {out_dir}\n")
 
         for i, path in enumerate(paths, 1):
