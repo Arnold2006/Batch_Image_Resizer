@@ -272,6 +272,9 @@ class ImageResizerApp:
         self.file_paths.clear()
         self.progress.set(0)
         self.progress_label.configure(text="")
+        self.log_box.configure(state="normal")
+        self.log_box.delete("1.0", "end")
+        self.log_box.configure(state="disabled")
         self._update_state()
 
     def _update_state(self):
