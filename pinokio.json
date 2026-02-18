@@ -1,0 +1,7 @@
+{
+  "title": "Image Resizer",
+  "description": "Batch resize images to 512, 768, or 1024px on the longest side while preserving aspect ratio. Supports JPG, PNG, BMP, GIF, TIFF, and WebP.",
+  "icon": "icon.png",
+  "links": [],
+  "posts": []
+}
