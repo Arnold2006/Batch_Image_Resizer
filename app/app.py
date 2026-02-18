@@ -295,25 +295,24 @@ class ImageResizerApp:
         if not self.file_paths:
             self._append_log("⚠  No images selected.")
             return
-        size    = int(self.size_var.get())
-        out_dir = os.path.join(os.path.dirname(self.file_paths[0]), f"Resized_{size}")
-        os.makedirs(out_dir, exist_ok=True)
-        self.folder_label.configure(text=out_dir)
         self.resize_btn.configure(state="disabled", text="Processing…")
+        self.folder_label.configure(text=f"Resized_<size> next to each source file")
         self.progress.set(0)
-        threading.Thread(target=self._process, args=(out_dir,), daemon=True).start()
+        size = int(self.size_var.get())
+        threading.Thread(target=self._process, args=(size,), daemon=True).start()
 
-    def _process(self, out_dir: str):
+    def _process(self, size: int):
         paths   = list(self.file_paths)
-        size    = int(self.size_var.get())
         total   = len(paths)
         success = 0
 
         self._log(f"\n▶  Resizing {total} image(s)  →  {size}px longest side")
-        self._log(f"   Output: {out_dir}\n")
+        self._log(f"   Output: Resized_{size}/ next to each source file\n")
 
         for i, path in enumerate(paths, 1):
-            fname = os.path.basename(path)
+            fname   = os.path.basename(path)
+            out_dir = os.path.join(os.path.dirname(path), f"Resized_{size}")
+            os.makedirs(out_dir, exist_ok=True)
             try:
                 img    = Image.open(path)
                 w, h   = img.size
@@ -328,7 +327,7 @@ class ImageResizerApp:
                     out_path = os.path.join(out_dir, f"{name}_resized.png")
                     resized.save(out_path, "PNG")
                 success += 1
-                self._log(f"   ✓  {fname}  ({w}×{h}  →  {nw}×{nh})")
+                self._log(f"   ✓  {fname}  ({w}×{h}  →  {nw}×{nh})  →  {out_dir}")
             except Exception as exc:
                 self._log(f"   ✗  {fname}  ERROR: {exc}")
 
