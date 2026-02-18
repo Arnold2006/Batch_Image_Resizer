@@ -9,14 +9,14 @@ module.exports = {
         ]
       }
     },
-    // Install Python dependencies (only Pillow is needed — no torch, no gradio)
+    // Install Python dependencies
     {
       method: "shell.run",
       params: {
-        venv: "env",      // virtual environment folder
-        path: "app",      // run from inside the cloned repo
+        venv: "env",
+        path: "app",
         message: [
-          "uv pip install Pillow",
+          "uv pip install Pillow customtkinter tkinterdnd2",
         ]
       }
     },
