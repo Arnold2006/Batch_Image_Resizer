@@ -13,11 +13,18 @@ from tkinter import filedialog
 from PIL import Image
 import customtkinter as ctk
 
-# ── Drag & drop (optional) ──────────────────────────────────────────────────
+# ── Drag & drop ─────────────────────────────────────────────────────────────
+# tkinterdnd2 must be baked into the root window's class hierarchy — patching
+# it in afterwards does not work with CustomTkinter. We create a combined base.
 try:
-    import tkinterdnd2
+    from tkinterdnd2 import TkinterDnD, DND_FILES
+    class TkDnD(ctk.CTk, TkinterDnD.Tk):
+        """CustomTkinter window with native drag-and-drop support."""
+        def __init__(self):
+            super().__init__()
     DND_AVAILABLE = True
 except ImportError:
+    TkDnD = None
     DND_AVAILABLE = False
 
 # ── Theme ───────────────────────────────────────────────────────────────────
@@ -75,14 +82,7 @@ class ImageResizerApp:
 
     def __init__(self):
         # ── Root window ──────────────────────────────────────────────────
-        self.root = ctk.CTk()
-
-        # Patch tkinterdnd2 into the CTk window if available
-        if DND_AVAILABLE:
-            try:
-                tkinterdnd2.TkinterDnD._require(self.root)
-            except Exception:
-                pass
+        self.root = TkDnD() if DND_AVAILABLE else ctk.CTk()
 
         self.root.title("Image Resizer")
         self.root.geometry("860x700")
@@ -171,11 +171,8 @@ class ImageResizerApp:
         # ── Click + DnD bindings ─────────────────────────────────────────
         self.drop_frame.bind("<Button-1>", lambda _: self.browse_files())
         if DND_AVAILABLE:
-            try:
-                self.drop_frame.drop_target_register(DND_FILES)      # type: ignore
-                self.drop_frame.dnd_bind("<<Drop>>", self._on_drop)  # type: ignore
-            except Exception:
-                pass
+            self.drop_frame.drop_target_register(DND_FILES)
+            self.drop_frame.dnd_bind("<<Drop>>", self._on_drop)
 
     def _build_settings(self, parent):
         row = ctk.CTkFrame(parent, fg_color="#272740", corner_radius=12)
