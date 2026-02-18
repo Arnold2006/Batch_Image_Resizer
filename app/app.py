@@ -36,7 +36,7 @@ class ThumbnailCard(ctk.CTkFrame):
     """A small card showing an image preview + filename + remove button."""
 
     def __init__(self, parent, image_path: str, on_remove, **kw):
-        super().__init__(parent, fg_color="#252537", corner_radius=10,
+        super().__init__(parent, fg_color="#32324a", corner_radius=10,
                          width=THUMB_PX + 16, **kw)
         self.image_path = image_path
         self.grid_propagate(False)
@@ -56,7 +56,7 @@ class ThumbnailCard(ctk.CTkFrame):
         name = Path(image_path).name
         short = name if len(name) <= 13 else name[:10] + "…"
         ctk.CTkLabel(self, text=short,
-                     font=ctk.CTkFont(size=10), text_color="#7777aa",
+                     font=ctk.CTkFont(size=10), text_color="#9999cc",
                      wraplength=THUMB_PX).pack(padx=4)
 
         # ── Remove button ────────────────────────────────────────────────
@@ -101,14 +101,14 @@ class ImageResizerApp:
     # ─────────────────────────────────────────────────────────────────────
     def _build_ui(self):
         # ── Header ───────────────────────────────────────────────────────
-        hdr = ctk.CTkFrame(self.root, fg_color="#11111f", corner_radius=0, height=58)
+        hdr = ctk.CTkFrame(self.root, fg_color="#1e1e30", corner_radius=0, height=58)
         hdr.pack(fill="x")
         hdr.pack_propagate(False)
         ctk.CTkLabel(hdr, text="🖼  Image Resizer",
                      font=ctk.CTkFont(size=20, weight="bold"),
-                     text_color="#c8c8ff").pack(side="left", padx=22, pady=14)
+                     text_color="#e0e0ff").pack(side="left", padx=22, pady=14)
         ctk.CTkLabel(hdr, text="Batch resize · aspect-ratio preserved",
-                     font=ctk.CTkFont(size=12), text_color="#4a4a7a"
+                     font=ctk.CTkFont(size=12), text_color="#7070a0"
                      ).pack(side="left", padx=0, pady=14)
 
         # ── Body ─────────────────────────────────────────────────────────
@@ -130,8 +130,8 @@ class ImageResizerApp:
     def _build_drop_zone(self, parent):
         """Large drag-and-drop / thumbnail area."""
         self.drop_frame = ctk.CTkFrame(
-            parent, fg_color="#1a1a2e", corner_radius=14,
-            border_color="#2e2e50", border_width=2)
+            parent, fg_color="#272740", corner_radius=14,
+            border_color="#404065", border_width=2)
         self.drop_frame.pack(fill="both", expand=True)
 
         # ── Placeholder (shown when empty) ───────────────────────────────
@@ -139,21 +139,21 @@ class ImageResizerApp:
         self.placeholder.place(relx=0.5, rely=0.5, anchor="center")
 
         ctk.CTkLabel(self.placeholder, text="⬆",
-                     font=ctk.CTkFont(size=52), text_color="#2e2e55").pack()
+                     font=ctk.CTkFont(size=52), text_color="#4a4a7a").pack()
         ctk.CTkLabel(self.placeholder, text="Drop images here",
                      font=ctk.CTkFont(size=17, weight="bold"),
-                     text_color="#4a4a80").pack()
+                     text_color="#6a6aaa").pack()
         ctk.CTkLabel(self.placeholder, text="or",
-                     font=ctk.CTkFont(size=12), text_color="#333355").pack(pady=2)
+                     font=ctk.CTkFont(size=12), text_color="#505075").pack(pady=2)
         ctk.CTkButton(
             self.placeholder, text="Browse Files",
             font=ctk.CTkFont(size=13), command=self.browse_files,
-            fg_color="#2a2a55", hover_color="#4a4a99",
+            fg_color="#8a4500", hover_color="#c46000",
             width=150, height=38, corner_radius=20
         ).pack(pady=4)
         ctk.CTkLabel(self.placeholder,
                      text="JPG · PNG · BMP · GIF · TIFF · WebP",
-                     font=ctk.CTkFont(size=10), text_color="#2e2e50").pack(pady=(6, 0))
+                     font=ctk.CTkFont(size=10), text_color="#4a4a70").pack(pady=(6, 0))
 
         # ── Thumbnail scroll area (hidden when empty) ─────────────────────
         self.thumb_scroll = ctk.CTkScrollableFrame(
@@ -164,7 +164,7 @@ class ImageResizerApp:
         self.add_more_btn = ctk.CTkButton(
             self.drop_frame, text="+ Add more",
             font=ctk.CTkFont(size=12),
-            fg_color="#1e1e38", hover_color="#2e2e55",
+            fg_color="#6a3300", hover_color="#8a4500",
             width=110, height=28, corner_radius=14,
             command=self.browse_files)
         # not packed yet
@@ -179,7 +179,7 @@ class ImageResizerApp:
                 pass
 
     def _build_settings(self, parent):
-        row = ctk.CTkFrame(parent, fg_color="#1a1a2e", corner_radius=12)
+        row = ctk.CTkFrame(parent, fg_color="#272740", corner_radius=12)
         row.pack(fill="x", pady=(10, 0))
 
         # Size selector
@@ -191,7 +191,7 @@ class ImageResizerApp:
             font=ctk.CTkFont(size=13)
         ).pack(side="left", pady=12)
         ctk.CTkLabel(row, text="px · longest side",
-                     font=ctk.CTkFont(size=11), text_color="#4a4a6a"
+                     font=ctk.CTkFont(size=11), text_color="#7070a0"
                      ).pack(side="left", padx=(6, 20), pady=12)
 
         # Spacer
@@ -202,12 +202,12 @@ class ImageResizerApp:
                      font=ctk.CTkFont(size=13)).pack(side="left", padx=(0, 8))
         self.folder_label = ctk.CTkLabel(
             row, textvariable=self.output_var,
-            font=ctk.CTkFont(size=11), text_color="#6666aa",
+            font=ctk.CTkFont(size=11), text_color="#8888cc",
             wraplength=180, anchor="w")
         self.folder_label.pack(side="left", padx=(0, 8))
         ctk.CTkButton(
             row, text="Choose…", command=self.choose_output,
-            fg_color="#22224a", hover_color="#33336a",
+            fg_color="#7a3d00", hover_color="#a05200",
             width=90, height=32, font=ctk.CTkFont(size=12)
         ).pack(side="left", padx=(0, 16), pady=12)
 
@@ -219,17 +219,17 @@ class ImageResizerApp:
             row, text="Resize Images",
             font=ctk.CTkFont(size=14, weight="bold"),
             command=self.start_resize,
-            fg_color="#3a3aaa", hover_color="#5a5acc",
+            fg_color="#c46000", hover_color="#e07a00",
             height=44, width=180, corner_radius=22)
         self.resize_btn.pack(side="left")
 
         self.count_label = ctk.CTkLabel(
             row, text="No images selected",
-            font=ctk.CTkFont(size=12), text_color="#44447a")
+            font=ctk.CTkFont(size=12), text_color="#6666aa")
         self.count_label.pack(side="left", padx=14)
 
         self.progress_label = ctk.CTkLabel(
-            row, text="", font=ctk.CTkFont(size=12), text_color="#6666aa")
+            row, text="", font=ctk.CTkFont(size=12), text_color="#8888cc")
         self.progress_label.pack(side="right", padx=(6, 0))
 
         self.progress = ctk.CTkProgressBar(row, width=200, height=10, corner_radius=6)
@@ -247,7 +247,7 @@ class ImageResizerApp:
         self.log_box = ctk.CTkTextbox(
             parent, height=130,
             font=ctk.CTkFont(family="Courier", size=12),
-            fg_color="#0e0e1a", text_color="#8888cc",
+            fg_color="#1a1a2a", text_color="#aaaadd",
             corner_radius=10, state="disabled")
         self.log_box.pack(fill="x", pady=(10, 0))
 
